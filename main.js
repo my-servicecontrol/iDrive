@@ -1,26 +1,26 @@
 var myApp =
-  "https://script.google.com/macros/s/AKfycbxcGU3NteeviRKg4AEh-ZtNnB--S_NZ_4I8R6inp2WRhuhR-5F3qQIiFQcyvGDL81x5bg/exec";
-var tasks = "1tUkWfP-Ci68M-bh4nsEI0VxlOoEvvNv64fhwhwivNCU";
-var sName = "iDrive";
-//var eDate = "Активно до: 25.09.2025";
+  "https://script.google.com/macros/s/AKfycbxzRZzqmqa7wYiDReJ9ThXZomulg9a9jNvEH4F1SiIop2qDlW0tBLCl7sBZAhM9vjY/exec";
+var tasks = "1Ysr3R_390EBr5qvQO1JL1Fkd5V5C4Exvn6dtJQOBAgQ";
+var sName = "Autolavado El Planet";
+//var eDate = "Активно до: 18.08.2024";
 $("#offcanvasNavbarLabel").html(sName);
 //$("#dateend").html(eDate);
 $(document).ready(function () {
   loadTasks();
 });
-uStatus = [];
+var uStatus = [];
 const triggerTabList = document.querySelectorAll("#nav-tab button");
 triggerTabList.forEach((triggerEl) => {
   triggerEl.addEventListener("click", (event) => {
     uStatus.length = 0;
-    if (triggerEl.innerText == "В роботі") {
-      uStatus.push("в роботі");
+    if (triggerEl.innerText == "В работе") {
+      uStatus.push("в работе");
     }
-    if (triggerEl.innerText == "Закриті") {
-      uStatus.push("виконано");
+    if (triggerEl.innerText == "Сделано") {
+      uStatus.push("сделано");
     }
-    if (triggerEl.innerText == "Скасовані") {
-      uStatus.push("в архів");
+    if (triggerEl.innerText == "В архив") {
+      uStatus.push("в архив");
     }
     $("#myTable tbody").html(
       `<span class="spinner-grow spinner-grow-sm text-success" role="status" aria-hidden="true"></span>`
@@ -28,7 +28,7 @@ triggerTabList.forEach((triggerEl) => {
     loadTasks();
   });
 });
-uStatus.push("в роботі");
+uStatus.push("в работе");
 
 function loadTasks() {
   googleQuery(tasks, "0", "D:AH", `SELECT *`);
@@ -74,29 +74,34 @@ function tasksTable(data) {
       data.Sf[20].label
     }</th><th class="text-secondary text-truncate" style="min-width: 120px; max-width: 180px;">${
       data.Sf[25].label
-    }</th><th class="text-secondary">${data.Sf[24].label}</th></tr>`;
-
+    }</th>
+    <th class="text-secondary text-truncate" style="max-width: 80px;">${
+      data.Sf[26].label
+    }</th>
+    <th class="text-secondary">${data.Sf[29].label}</th></tr>`;
     var tr = ``;
     var trr = ``;
     for (i = data.Tf.length - 1; i >= 0; i--) {
       var colorw =
-        data.Tf[i].c[4].v == "в роботі"
-          ? `class="table-success" title="в роботі"`
+        data.Tf[i].c[4].v == "в работе"
+          ? `class="table-success" title="в работе"`
           : ``;
-      if (data.Tf[i].c[4].v == "закупівля") {
-        var colorp = `class="table-secondary" title="закупівля"`;
+
+      if (data.Tf[i].c[4].v == "закупка") {
+        var colorp = `class="table-secondary" title="закупка"`;
       }
       if (data.Tf[i].c[4].v == "весь документ") {
         var colorp = `class="table-light" title="весь документ"`;
       }
-      if (data.Tf[i].c[4].v == "пропозиція") {
-        var colorp = `title="пропозиція"`;
-        var textColor = uStatus == "в архів" ? `text-secondary` : ``;
+      if (data.Tf[i].c[4].v == "предложение") {
+        var colorp = `title="предложение"`;
       }
-      var linkColor =
-        uStatus == "в архів" ? `class="link-secondary"` : `class="link-dark"`;
 
-      if (data.Tf[i].c[4].v == uStatus) {
+      var textColor = uStatus == "в архив" ? `text-secondary` : ``;
+      var linkColor =
+        uStatus == "в архив" ? `class="link-secondary"` : `class="link-dark"`;
+
+      if (data.Tf[i].c[4].v == uStatus && data.Tf[i].c[24].v == sName) {
         tr += `<tr ${colorw}>
         <td><a target="_blank" href="${data.Tf[i].c[2].v}" ${linkColor}>${
           data.Tf[i].c[3].v
@@ -112,15 +117,20 @@ function tasksTable(data) {
         }</td>
             <td class="${textColor} text-start text-truncate" style="min-width: 120px; max-width: 180px;">${
           data.Tf[i].c[25].v
-        }</td><td class="${textColor} text-end">${
-          data.Tf[i].c[24].v
+        }</td>
+            <td class="${textColor} text-truncate"><a href="tel:+${
+          data.Tf[i].c[26].v
+        }" ${linkColor}>${data.Tf[i].c[26].v}</a></td>
+            <td class="${textColor} text-end">${
+          data.Tf[i].c[29].v + " " + data.Tf[i].c[30].v
         }</td></tr>`;
       }
       if (
-        (data.Tf[i].c[4].v == "пропозиція" ||
-          data.Tf[i].c[4].v == "закупівля" ||
+        (data.Tf[i].c[4].v == "предложение" ||
+          data.Tf[i].c[4].v == "закупка" ||
           data.Tf[i].c[4].v == "весь документ") &&
-        uStatus == "в роботі"
+        uStatus == "в работе" &&
+        data.Tf[i].c[24].v == sName
       ) {
         trr += `<tr ${colorp}>
 						<td><a target="_blank" href="${data.Tf[i].c[2].v}" class="link-secondary">${
@@ -137,9 +147,13 @@ function tasksTable(data) {
             }</td>
             <td class="text-start text-secondary text-truncate" style="min-width: 120px; max-width: 180px;">${
               data.Tf[i].c[25].v
-            }</td><td class="text-end text-secondary">${
-          data.Tf[i].c[24].v
-        }</td></tr>`;
+            }</td>
+            <td class="text-secondary text-truncate"><a href="tel:+${
+              data.Tf[i].c[26].v
+            }" class="link-secondary">${data.Tf[i].c[26].v}</a></td>
+            <td class="text-end text-secondary">${
+              data.Tf[i].c[29].v + " " + data.Tf[i].c[30].v
+            }</td></tr>`;
       }
     }
     return `<table id="myTable" class="table text-center table-hover table-sm table-responsive text-truncate"><thead>${th}</thead><tbody>${tr}${trr}</tbody></table>`;
@@ -148,7 +162,7 @@ function tasksTable(data) {
 var fil = [];
 function myFunction() {
   fil.length = 0;
-  var input, filter, table, tr, td, td1, td2, td3, td4, td5, i;
+  var input, filter, table, tr, td, td1, td2, td3, td4, td5, td6, i;
   input = document.getElementById("myInput");
   filter = input.value.toUpperCase();
   table = document.getElementById("myTable");
@@ -164,6 +178,7 @@ function myFunction() {
     td3 = tr[i].getElementsByTagName("td")[3];
     td4 = tr[i].getElementsByTagName("td")[4];
     td5 = tr[i].getElementsByTagName("td")[5];
+    td6 = tr[i].getElementsByTagName("td")[6];
     if (td) {
       if (
         td.innerHTML.toUpperCase().indexOf(filter) > -1 ||
@@ -171,7 +186,8 @@ function myFunction() {
         td2.innerHTML.toUpperCase().indexOf(filter) > -1 ||
         td3.innerHTML.toUpperCase().indexOf(filter) > -1 ||
         td4.innerHTML.toUpperCase().indexOf(filter) > -1 ||
-        td5.innerHTML.toUpperCase().indexOf(filter) > -1
+        td5.innerHTML.toUpperCase().indexOf(filter) > -1 ||
+        td6.innerHTML.toUpperCase().indexOf(filter) > -1
       ) {
         tr[i].style.display = "";
       } else {
@@ -212,7 +228,7 @@ function tasksModal(data) {
   }
   numCheck = 1;
   for (i = 0; i < data.Tf.length; i++) {
-    numCheck++;
+    if (data.Tf[i].c[24].v == sName) numCheck++;
   }
   opcNum.length = 0;
   opcMake.length = 0;
@@ -307,7 +323,7 @@ function tasksModal(data) {
     }
     if (swap == 1) {
       for (var n = data.Tf.length - 1; n >= 0; n--) {
-        if (data.Tf[n].c[25].v == str) {
+        if (data.Tf[n].c[24].v == sName && data.Tf[n].c[25].v == str) {
           opcClient.push(`<option>${data.Tf[i].c[25].v}</option>`);
           break;
         }
